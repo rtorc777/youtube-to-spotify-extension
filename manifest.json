@@ -19,6 +19,6 @@
     "permissions": [
         "identity",
         "scripting",
-        "tabs"
+        "storage"
     ]
 }

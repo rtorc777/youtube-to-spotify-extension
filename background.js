@@ -45,6 +45,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             
                         if (state === STATE) {
                             user_signed_in = true;
+                            chrome.storage.local.set({'access_token': ACCESS_TOKEN}, () => {
+                                console.log('Saved Access Token');
+                              });
             
                             setTimeout(() => {
                                 ACCESS_TOKEN = '';
