@@ -35,3 +35,21 @@ async function getTracks(){
     const data = await result.json();
     return data.items
 }
+
+async function getYoutubeTracks(title, artist){
+    const result = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(title + " artist:" + artist) + '&type=track&limit=1', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    return data.tracks
+}
+
+document.getElementById('test').addEventListener('click', async () =>  {
+    const track = await getYoutubeTracks("congratulations", "pewdiepie");
+    console.log(track)
+
+});
