@@ -2,7 +2,7 @@
 const CLIENT_ID = 'a2d10eb9ff814f72848448ee949e08af';
 const RESPONSE_TYPE = 'token';
 const REDIRECT_URI = 'http://cpefngoddfgkmljkmlfocjhlhpiajkcp.chromiumapp.org/';
-const SCOPE = 'user-read-email user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
+const SCOPE = 'user-read-email user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-top-read';
 const SHOW_DIALOG = 'true';
 let STATE = '';
 let ACCESS_TOKEN = '';
