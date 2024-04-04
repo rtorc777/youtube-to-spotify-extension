@@ -19,6 +19,8 @@
     "permissions": [
         "identity",
         "scripting",
-        "storage"
-    ]
+        "storage",
+        "tabs"
+    ],
+    "host_permissions" : ["https://*.youtube.com/*"]
 }
