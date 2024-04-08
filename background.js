@@ -1,4 +1,4 @@
-//Request User Authorization - NOTE, using Implicit Grant Flow 
+//Request User Authorization - NOTE, using Implicit Grant Flow, so token doesn't refresh (Need to sign in and out every hour) 
 const CLIENT_ID = 'a2d10eb9ff814f72848448ee949e08af';
 const RESPONSE_TYPE = 'token';
 const REDIRECT_URI = 'http://cpefngoddfgkmljkmlfocjhlhpiajkcp.chromiumapp.org/';
