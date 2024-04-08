@@ -28,6 +28,7 @@ async function onClick(){
         detectSongs(tab);
 }
 
+//Runs the scraping script on the current YouTube page
 async function detectSongs(tab) {
     chrome.scripting.executeScript({
         target: { tabId : tab.id },
@@ -35,26 +36,31 @@ async function detectSongs(tab) {
     }).then(async (songResults) => {
         const songs = songResults[0].result;
         for (let song of songs) {
-            const track = await getTrack(song[0], song[1]);
-            if (!track.length == 0){
-                const url = track[0].external_urls.spotify;
-                const title = track[0].name;
-                const artist = track[0].artists[0].name;
-                const image = track[0].album.images[1].url; 
 
-                let songImg = document.createElement("img")
-                songImg.src = image;
-                document.body.appendChild(songImg);
+            let track = await getTrack(song[0], song[1]);
 
-                let songInfo = document.createElement("p");
-                songInfo.innerHTML = title + " by " + artist + " (" + '<a href="' + url + '" target="_blank"> Link </a>' + ")";
-                document.body.appendChild(songInfo);
-
+            if (track.length == 0){ 
+                track = await getTrack(song[0] + song[1], ""); //Try searching without artist filter, might not detect it
+                if (track.length == 0) return;
             }
+
+            const url = track[0].external_urls.spotify;
+            const title = track[0].name;
+            const artist = track[0].artists[0].name;
+            const image = track[0].album.images[1].url; 
+
+            let songImg = document.createElement("img")
+            songImg.src = image;
+            document.body.appendChild(songImg);
+
+            let songInfo = document.createElement("p");
+            songInfo.innerHTML = title + " by " + artist + " (" + '<a href="' + url + '" target="_blank"> Link </a>' + ")";
+            document.body.appendChild(songInfo);
         }
       })
 }
 
+//Check for Youtube Music songs on page
 function getSongs() { 
     const songs = [];
     const dupes = [];
@@ -74,6 +80,7 @@ function getSongs() {
 
 }
 
+//Use Spotify API to get the Spotify track 
 async function getTrack(title, artist){
     const result = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(title + " artist:" + artist) + '&type=track&limit=1', {
         method: 'GET',
