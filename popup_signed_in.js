@@ -33,6 +33,7 @@ async function onClick(){
     tab = tab[0];
     
     if (tab.url && tab.url.includes("youtube.com/watch")){
+        showPlaylists();
         getTitle(tab);
         detectSongs(tab);
     }
@@ -67,6 +68,27 @@ async function detectSongs(tab) {
       })
 }
 
+async function showPlaylists(){
+    const playlists = await getPlaylists();
+    for(let playlist of playlists){
+        getPlaylistInfo(playlist);
+    }
+}
+
+function getPlaylistInfo(playlist){
+    const id = playlist.id;
+    const name = playlist.name;
+
+    const playlists = document.getElementById("playlists");
+    const option = document.createElement("option");
+    
+    option.value = id;
+    option.innerHTML = name;
+
+    playlists.appendChild(option);
+    playlists.hidden = false;
+}
+
 /** Uses Spotify API 
  *  @return Spotify Track */
 async function getTrack(title, artist){
@@ -96,6 +118,19 @@ async function getPlaylists(){
     return data.items.filter((playlist) => playlist.owner.id === userId);
 }
 
+/** Uses Spotify API
+ *  @return success */
+async function addTrack(playlist, uri){
+    const result = await fetch('https://api.spotify.com/v1/playlists/' + playlist + '/tracks?uris=' + encodeURIComponent(uri), {
+        method: 'POST',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    return result;
+}
+
 /** Uses Spotify API 
  *  @return Spotify User ID */
 async function getId(){
@@ -112,15 +147,15 @@ async function getId(){
 
 /** Adds song information from Spotify API results to popup */
 function getTrackInfo(track){
-    const songs = document.getElementById("songs");
-    const song = document.createElement("div");
-    song.id = "song";
-
     const url = track.external_urls.spotify;
     const title = track.name;
     const artist = track.artists[0].name;
     const image = track.album.images[1].url;
     const preview_url = track.preview_url; 
+
+    const songs = document.getElementById("songs");
+    const song = document.createElement("div");
+    song.id = "song";
 
     const songImg = document.createElement("img") //Image with Spotify Link
     songImg.src = image;
@@ -171,5 +206,9 @@ function getSongs() {
 document.getElementById('test').addEventListener('click', async () =>  {
     const playlists = await getPlaylists();
     console.log(playlists);
+    const track = await getTrack("congrat", "post")
+    console.log(track);
+    const add = await addTrack("0qHZnKxDbEqEVF6C0SF6Ia", "spotify:track:3a1lNhkSLSkpJE4MSHpDu9")
+    console.log(add);
 });
 
