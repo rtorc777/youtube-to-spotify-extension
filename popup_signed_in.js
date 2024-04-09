@@ -1,4 +1,4 @@
-let access_token = ""
+let access_token = "";
 let videoTitle = "";
 chrome.storage.local.get(["access_token"], (result) => {
     access_token = result.access_token;
@@ -6,40 +6,39 @@ chrome.storage.local.get(["access_token"], (result) => {
 
 onClick();
 
-//Signs out of Spotify
+/** Signs out of Spotify */
 document.getElementById('sign-out').addEventListener('click', () =>  {
     chrome.runtime.sendMessage({ message: 'logout' }, function (response) {
         if (response.message === 'success'){
-            console.log("Sign Out Successful")
             window.close();
         } 
     });
 });
 
-//Uses the video title instead of detecting YouTube Music
+/** Uses the video title instead of detecting YouTube Music */
 document.getElementById('title').addEventListener('click', async () =>  {
     const songs = document.getElementById("songs");
     if(!videoTitle == ""){
         const track = await getTrack(videoTitle, "");
-        if(!track.length == 0){
+        if(track !== undefined){
             songs.replaceChildren();
             getTrackInfo(track);
         }
     }
 });
 
-//After clicking on the extension icon, it will get the title of the Youtube video and show all of the songs detected from the description in the popup
+/** After clicking on the extension icon, it will get the title of the Youtube video and show all of the songs detected from the description in the popup */
 async function onClick(){
     let tab = await chrome.tabs.query({active: true});
-    tab = tab[0]
+    tab = tab[0];
     
     if (tab.url && tab.url.includes("youtube.com/watch")){
-        getTitle(tab)
+        getTitle(tab);
         detectSongs(tab);
     }
 }
 
-//Gets the title of the YouTube video
+/** Gets the title of the YouTube video */
 async function getTitle(tab) {
     chrome.scripting.executeScript({
         target: { tabId : tab.id },
@@ -49,7 +48,7 @@ async function getTitle(tab) {
       })
 }
 
-//Runs the scraping script on the current YouTube page
+/** Runs the scraping script on the current YouTube page */
 async function detectSongs(tab) {
     chrome.scripting.executeScript({
         target: { tabId : tab.id },
@@ -58,9 +57,9 @@ async function detectSongs(tab) {
         const songs = songResults[0].result;
         for (let song of songs) {
             let track = await getTrack(song[0], song[1]);
-            if (track.length == 0){ 
+            if (track === undefined){ 
                 track = await getTrack(song[0] + " " + song[1], ""); //Try searching without artist filter, might not detect it
-                if (track.length == 0) return;
+                if (track === undefined) return;
             }
 
             getTrackInfo(track);
@@ -68,7 +67,8 @@ async function detectSongs(tab) {
       })
 }
 
-//Use Spotify API to get the Spotify track 
+/** Uses Spotify API 
+ *  @return Spotify Track */
 async function getTrack(title, artist){
     const result = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(title + " artist:" + artist) + '&type=track&limit=1', {
         method: 'GET',
@@ -78,11 +78,12 @@ async function getTrack(title, artist){
     });
 
     const data = await result.json();
-    return data.tracks.items;
+    return data.tracks.items[0];
 }
 
-//Use Spotify API to get User's Spotify playlists that user created
-async function getPlaylist(){
+/** Uses Spotify API 
+ *  @return Spotify Playlists created by User */
+async function getPlaylists(){
     const result = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
         method: 'GET',
         headers: {
@@ -92,10 +93,11 @@ async function getPlaylist(){
 
     const data = await result.json();
     const userId = await getId();
-    return data.items.filter((playlist) => playlist.owner.id === userId);;
+    return data.items.filter((playlist) => playlist.owner.id === userId);
 }
 
-//Use Spotify API to get User's id
+/** Uses Spotify API 
+ *  @return Spotify User ID */
 async function getId(){
     const result = await fetch('https://api.spotify.com/v1/me/', {
         method: 'GET',
@@ -108,17 +110,17 @@ async function getId(){
     return data.id;
 }
 
-//Adds song information from Spotify API results to popup
+/** Adds song information from Spotify API results to popup */
 function getTrackInfo(track){
     const songs = document.getElementById("songs");
     const song = document.createElement("div");
     song.id = "song";
 
-    const url = track[0].external_urls.spotify;
-    const title = track[0].name;
-    const artist = track[0].artists[0].name;
-    const image = track[0].album.images[1].url;
-    const preview_url = track[0].preview_url; 
+    const url = track.external_urls.spotify;
+    const title = track.name;
+    const artist = track.artists[0].name;
+    const image = track.album.images[1].url;
+    const preview_url = track.preview_url; 
 
     const songImg = document.createElement("img") //Image with Spotify Link
     songImg.src = image;
@@ -132,11 +134,11 @@ function getTrackInfo(track){
     songInfo.innerHTML = title + " by " + artist + " ";
     song.appendChild(songInfo);
 
-    const songPreview = document.createElement("audio") //Spoify Preview (if there is one)
-    songPreview.setAttribute("controls","")
+    const songPreview = document.createElement("audio"); //Spoify Preview (if there is one)
+    songPreview.setAttribute("controls","");
     songPreview.volume = 0.05;
     if (preview_url !== null){
-        const preview = document.createElement("source")
+        const preview = document.createElement("source");
         preview.src = preview_url;
         preview.type = "audio/mpeg";
         songPreview.appendChild(preview);
@@ -146,7 +148,7 @@ function getTrackInfo(track){
     songs.appendChild(song);
 }
 
-//Check for Youtube Music songs on page
+/** Check for Youtube Music songs on page */
 function getSongs() {
     videoTitle = document.querySelector("h1.ytd-watch-metadata").innerText; 
     const songs = [];
@@ -159,7 +161,7 @@ function getSongs() {
         
         if(!dupes.includes(title)){
             dupes.push(title);
-            songs.push([title, artist])
+            songs.push([title, artist]);
         }   
     }
     return songs;
@@ -167,7 +169,7 @@ function getSongs() {
 
 //***DELETE THIS WHEN DONE***
 document.getElementById('test').addEventListener('click', async () =>  {
-    const playlists = await getPlaylist();
+    const playlists = await getPlaylists();
     console.log(playlists);
 });
 
