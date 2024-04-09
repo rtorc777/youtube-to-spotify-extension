@@ -78,7 +78,34 @@ async function getTrack(title, artist){
     });
 
     const data = await result.json();
-    return data.tracks.items
+    return data.tracks.items;
+}
+
+//Use Spotify API to get User's Spotify playlists that user created
+async function getPlaylist(){
+    const result = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    const userId = await getId();
+    return data.items.filter((playlist) => playlist.owner.id === userId);;
+}
+
+//Use Spotify API to get User's id
+async function getId(){
+    const result = await fetch('https://api.spotify.com/v1/me/', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    return data.id;
 }
 
 //Adds song information from Spotify API results to popup
@@ -138,8 +165,9 @@ function getSongs() {
     return songs;
 }
 
-// document.getElementById('test').addEventListener('click', async () =>  {
-//     const track = await getTrack("sugar song to bitter step", "");
-//     console.log(track)
-// });
+//***DELETE THIS WHEN DONE***
+document.getElementById('test').addEventListener('click', async () =>  {
+    const playlists = await getPlaylist();
+    console.log(playlists);
+});
 
