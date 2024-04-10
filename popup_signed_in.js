@@ -1,10 +1,9 @@
 let access_token = "";
 let videoTitle = "";
-chrome.storage.local.get(["access_token"], (result) => {
-    access_token = result.access_token;
-} )
+
 
 onClick();
+
 
 /** Signs out of Spotify */
 document.getElementById('sign-out').addEventListener('click', () =>  {
@@ -15,7 +14,8 @@ document.getElementById('sign-out').addEventListener('click', () =>  {
     });
 });
 
-/** Uses the video title instead of detecting YouTube Music */
+
+/** Uses the video title to search for song instead */
 document.getElementById('title').addEventListener('click', async () =>  {
     const songs = document.getElementById("songs");
     if(!videoTitle == ""){
@@ -27,17 +27,26 @@ document.getElementById('title').addEventListener('click', async () =>  {
     }
 });
 
-/** After clicking on the extension icon, it will get the title of the Youtube video and show all of the songs detected from the description in the popup */
+
+/** After clicking on the extension icon, it will:
+ *  1) Get all User's playlists
+ *  2) Get the title of the Youtube video 
+ *  3) Detect all the Songs in the description */
 async function onClick(){
     let tab = await chrome.tabs.query({active: true});
     tab = tab[0];
     
+    access_token = await chrome.storage.local.get(["access_token"], (result) => {
+        access_token = result.access_token;
+    } )
+    
     if (tab.url && tab.url.includes("youtube.com/watch")){
-        showPlaylists();
         getTitle(tab);
+        showPlaylists(tab);
         detectSongs(tab);
     }
 }
+
 
 /** Gets the title of the YouTube video */
 async function getTitle(tab) {
@@ -48,6 +57,36 @@ async function getTitle(tab) {
         videoTitle = title[0].result;
       })
 }
+
+
+/** Gets the User's owned playlists and adds them to the popup*/
+async function showPlaylists(tab) {
+    chrome.scripting.executeScript({
+        target: { tabId : tab.id },
+        func: (() => {}),
+    }).then(async () => {
+        const playlists = await getPlaylists();
+        for(let playlist of playlists) {
+            getPlaylistInfo(playlist);
+        }
+      })
+}
+
+
+/** Helper to add playlist to the popup */
+function getPlaylistInfo(playlist){
+    const id = playlist.id;
+    const name = playlist.name;
+
+    const playlists = document.getElementById("playlists");
+    const option = document.createElement("option");
+    
+    option.value = id;
+    option.innerHTML = name;
+
+    playlists.appendChild(option);
+}
+
 
 /** Runs the scraping script on the current YouTube page */
 async function detectSongs(tab) {
@@ -68,84 +107,8 @@ async function detectSongs(tab) {
       })
 }
 
-async function showPlaylists(){
-    const playlists = await getPlaylists();
-    for(let playlist of playlists){
-        getPlaylistInfo(playlist);
-    }
-}
 
-function getPlaylistInfo(playlist){
-    const id = playlist.id;
-    const name = playlist.name;
-
-    const playlists = document.getElementById("playlists");
-    const option = document.createElement("option");
-    
-    option.value = id;
-    option.innerHTML = name;
-
-    playlists.appendChild(option);
-    playlists.hidden = false;
-}
-
-/** Uses Spotify API 
- *  @return Spotify Track */
-async function getTrack(title, artist){
-    const result = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(title + " artist:" + artist) + '&type=track&limit=1', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + access_token
-        }
-    });
-
-    const data = await result.json();
-    return data.tracks.items[0];
-}
-
-/** Uses Spotify API 
- *  @return Spotify Playlists created by User */
-async function getPlaylists(){
-    const result = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + access_token
-        }
-    });
-
-    const data = await result.json();
-    const userId = await getId();
-    return data.items.filter((playlist) => playlist.owner.id === userId);
-}
-
-/** Uses Spotify API
- *  @return success */
-async function addTrack(playlist, uri){
-    const result = await fetch('https://api.spotify.com/v1/playlists/' + playlist + '/tracks?uris=' + encodeURIComponent(uri), {
-        method: 'POST',
-        headers: {
-            'Authorization' : 'Bearer ' + access_token
-        }
-    });
-
-    return result;
-}
-
-/** Uses Spotify API 
- *  @return Spotify User ID */
-async function getId(){
-    const result = await fetch('https://api.spotify.com/v1/me/', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + access_token
-        }
-    });
-
-    const data = await result.json();
-    return data.id;
-}
-
-/** Adds song information from Spotify API results to popup */
+/** Helper to add song information to popup */
 function getTrackInfo(track){
     const url = track.external_urls.spotify;
     const title = track.name;
@@ -169,7 +132,7 @@ function getTrackInfo(track){
     songInfo.innerHTML = title + " by " + artist + " ";
     song.appendChild(songInfo);
 
-    const songPreview = document.createElement("audio"); //Spoify Preview (if there is one)
+    const songPreview = document.createElement("audio"); //Spotify Preview (if there is one)
     songPreview.setAttribute("controls","");
     songPreview.volume = 0.05;
     if (preview_url !== null){
@@ -182,6 +145,67 @@ function getTrackInfo(track){
 
     songs.appendChild(song);
 }
+
+
+/** Uses Spotify API 
+ *  @return Spotify track */
+async function getTrack(title, artist){
+    const result = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(title + " artist:" + artist) + '&type=track&limit=1', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    return data.tracks.items[0];
+}
+
+
+/** Uses Spotify API 
+ *  @return Spotify playlists owned by User */
+async function getPlaylists(){
+    const result = await fetch('https://api.spotify.com/v1/me/playlists', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    const userId = await getId();
+    return data.items.filter((playlist) => playlist.owner.id === userId);
+}
+
+
+/** Uses Spotify API
+ *  @return Success response */
+async function addTrack(playlist, uri){
+    const result = await fetch('https://api.spotify.com/v1/playlists/' + playlist + '/tracks?uris=' + encodeURIComponent(uri), {
+        method: 'POST',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    return result;
+}
+
+
+/** Uses Spotify API 
+ *  @return Spotify User ID */
+async function getId(){
+    const result = await fetch('https://api.spotify.com/v1/me/', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + access_token
+        }
+    });
+
+    const data = await result.json();
+    return data.id;
+}
+
 
 /** Check for Youtube Music songs on page */
 function getSongs() {
@@ -202,13 +226,14 @@ function getSongs() {
     return songs;
 }
 
+
 //***DELETE THIS WHEN DONE***
-document.getElementById('test').addEventListener('click', async () =>  {
-    const playlists = await getPlaylists();
-    console.log(playlists);
-    const track = await getTrack("congrat", "post")
-    console.log(track);
-    const add = await addTrack("0qHZnKxDbEqEVF6C0SF6Ia", "spotify:track:3a1lNhkSLSkpJE4MSHpDu9")
-    console.log(add);
-});
+// document.getElementById('test').addEventListener('click', async () =>  {
+//     const playlists = await getPlaylists();
+//     console.log(playlists);
+//     const track = await getTrack("congrat", "post")
+//     console.log(track);
+//     const add = await addTrack("0qHZnKxDbEqEVF6C0SF6Ia", "spotify:track:3a1lNhkSLSkpJE4MSHpDu9")
+//     console.log(add);
+// });
 
