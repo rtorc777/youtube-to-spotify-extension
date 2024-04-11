@@ -47,14 +47,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             signed_in = true;
                             chrome.storage.local.set({'access_token': ACCESS_TOKEN});
             
-                            setTimeout(() => {
+                            chrome.action.setPopup({ popup: 'popup_signed_in.html' }, () => {
+                                sendResponse({ message: 'success' });
+                            });
+
+
+                            chrome.alarms.create({ delayInMinutes: 60 }); //Spotify Token expires every hour, so need to re-sign in to get new Token
+                            chrome.alarms.onAlarm.addListener(() => {
                                 ACCESS_TOKEN = '';
                                 signed_in = false;
                                 chrome.action.setPopup({ popup: 'popup.html' });
-                            }, 3600000);
-            
-                            chrome.action.setPopup({ popup: 'popup_signed_in.html' }, () => {
-                                sendResponse({ message: 'success' });
                             });
 
                         } else {
