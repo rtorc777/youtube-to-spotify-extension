@@ -41,6 +41,8 @@ async function onClick(){
     } )
     
     if (tab.url && tab.url.includes("youtube.com/watch")){
+        document.getElementById("title").hidden = false;
+        document.getElementById("text").hidden = false;
         getTitle(tab);
         showPlaylists(tab);
         detectSongs(tab);
