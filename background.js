@@ -44,14 +44,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         let state = redirect_url.substring(redirect_url.indexOf('state=') + 6);
             
                         if (state === STATE) {
-                            user_signed_in = true;
-                            chrome.storage.local.set({'access_token': ACCESS_TOKEN}, () => {
-                                console.log('Saved Access Token');
-                              });
+                            signed_in = true;
+                            chrome.storage.local.set({'access_token': ACCESS_TOKEN});
             
                             setTimeout(() => {
                                 ACCESS_TOKEN = '';
-                                user_signed_in = false;
+                                signed_in = false;
+                                chrome.action.setPopup({ popup: 'popup.html' });
                             }, 3600000);
             
                             chrome.action.setPopup({ popup: 'popup_signed_in.html' }, () => {
