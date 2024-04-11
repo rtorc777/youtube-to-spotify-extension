@@ -23,6 +23,12 @@ function create_spotify_endpoint() {
     return auth_url;
 }
 
+chrome.alarms.onAlarm.addListener(() => {
+    ACCESS_TOKEN = '';
+    signed_in = false;
+    chrome.action.setPopup({ popup: 'popup.html' });
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.message === 'login') {
         if (signed_in) {
@@ -53,11 +59,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
                             chrome.alarms.create({ delayInMinutes: 60 }); //Spotify Token expires every hour, so need to re-sign in to get new Token
-                            chrome.alarms.onAlarm.addListener(() => {
-                                ACCESS_TOKEN = '';
-                                signed_in = false;
-                                chrome.action.setPopup({ popup: 'popup.html' });
-                            });
 
                         } else {
                             sendResponse({ message: 'fail' });

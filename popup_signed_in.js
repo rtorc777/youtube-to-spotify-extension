@@ -115,6 +115,7 @@ function getTrackInfo(track){
     const artist = track.artists[0].name;
     const image = track.album.images[1].url;
     const preview_url = track.preview_url; 
+    const uri = track.uri;
 
     const songs = document.getElementById("songs");
     const song = document.createElement("div");
@@ -142,6 +143,16 @@ function getTrackInfo(track){
         songPreview.appendChild(preview);
     }
     song.appendChild(songPreview);
+
+    const addButton = document.createElement("button");
+    addButton.textContent = "Add to playlist";
+    addButton.addEventListener("click", async () => { //Function to song to the selected playlist
+        const playlist = document.getElementById("playlists").value; 
+        await addTrack(playlist, uri)
+        addButton.disabled = true;
+        addButton.textContent = "Successfully added";
+    })
+    song.appendChild(addButton);
 
     songs.appendChild(song);
 }
@@ -225,15 +236,3 @@ function getSongs() {
     }
     return songs;
 }
-
-
-//***DELETE THIS WHEN DONE***
-// document.getElementById('test').addEventListener('click', async () =>  {
-//     const playlists = await getPlaylists();
-//     console.log(playlists);
-//     const track = await getTrack("congrat", "post")
-//     console.log(track);
-//     const add = await addTrack("0qHZnKxDbEqEVF6C0SF6Ia", "spotify:track:3a1lNhkSLSkpJE4MSHpDu9")
-//     console.log(add);
-// });
-
