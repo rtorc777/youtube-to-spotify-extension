@@ -1,5 +1,25 @@
 let access_token = "";
 let videoTitle = "";
+const swiper = new Swiper('.swiper', {
+    slidesPerView: 1,
+    spaceBetween: 40,
+    observer: true,
+    preventClicks: true,
+    pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+    },
+    effect: 'coverflow',
+    coverflowEffect: {
+        rotate: 30,
+        slideShadows: false,
+    },
+    watchOverflow: true,
+  });
 
 
 onClick();
@@ -17,7 +37,7 @@ document.getElementById('sign-out').addEventListener('click', () =>  {
 
 /** Uses the video title to search for song instead */
 document.getElementById('title').addEventListener('click', async () =>  {
-    const songs = document.getElementById("songs");
+    const songs = document.getElementById("swiper-wrapper");
     if(!videoTitle == ""){
         const track = await getTrack(videoTitle, "");
         if(track !== undefined){
@@ -119,9 +139,10 @@ function getTrackInfo(track){
     const preview_url = track.preview_url; 
     const uri = track.uri;
 
-    const songs = document.getElementById("songs");
+    const songs = document.getElementById("swiper-wrapper");
     const song = document.createElement("div");
     song.id = "song";
+    song.classList.add("swiper-slide");
 
     const songImg = document.createElement("img") //Image with Spotify Link
     songImg.src = image;
