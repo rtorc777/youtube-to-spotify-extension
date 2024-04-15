@@ -14,9 +14,15 @@
 </head>
 <body>
     <div id='sign-out' class="button">Sign Out</div>
-    <div id='title'class="button" hidden>Use Title</div>
+    <label class="switch">
+        <input id='title' type="checkbox" hidden>
+        <span id='slider' class="slider" hidden></span>
+    </label>
     
-    <p id="text" hidden>Add to playlist: <select id="playlists"></select> </p>
+    <p id="text" hidden>Add to playlist: 
+        <select id="playlists"></select> 
+    </p>
+
     <div id="songs">
         <div id="swiper" class="swiper mySwiper">
             <div id="swiper-wrapper" class="swiper-wrapper"></div>

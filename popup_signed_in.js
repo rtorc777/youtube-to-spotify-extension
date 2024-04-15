@@ -1,5 +1,6 @@
 let access_token = "";
 let videoTitle = "";
+let titleMode;
 const swiper = new Swiper('.swiper', {
     slidesPerView: 1,
     spaceBetween: 40,
@@ -22,7 +23,28 @@ const swiper = new Swiper('.swiper', {
   });
 
 
-onClick();
+initialize();
+
+
+/** After clicking on the extension icon, it will:
+ *  1) Initialize the Spotify Access Token
+ *  2) Get the title of the YouTube video
+ *  3) Get the User's Spotify Playlists */
+async function initialize(){
+    let tab = await chrome.tabs.query({active: true});
+    tab = tab[0];
+
+    await chrome.storage.local.get(["access_token"], (result) => {
+        access_token = result.access_token;
+    });
+
+    if (tab.url && tab.url.includes("youtube.com/watch")){
+        await getTitle(tab).then(async () =>{
+            showPlaylists(tab);
+            onClick(tab);
+        });
+    }
+}  
 
 
 /** Signs out of Spotify */
@@ -35,37 +57,58 @@ document.getElementById('sign-out').addEventListener('click', () =>  {
 });
 
 
-/** Uses the video title to search for song instead */
+/** Toggle the use of using title or normal searching */
 document.getElementById('title').addEventListener('click', async () =>  {
-    const songs = document.getElementById("swiper-wrapper");
-    if(!videoTitle == ""){
-        const track = await getTrack(videoTitle, "");
-        if(track !== undefined){
-            songs.replaceChildren();
-            getTrackInfo(track);
-        }
+    let tab = await chrome.tabs.query({active: true});
+    tab = tab[0];
+
+    if(document.getElementById('title').checked){
+        chrome.storage.local.set({'titleMode': true})
+        useTitle();
+    }
+    else{
+        chrome.storage.local.set({'titleMode': false})
+        detectSongs(tab);
     }
 });
 
 
-/** After clicking on the extension icon, it will:
- *  1) Get all User's playlists
- *  2) Get the title of the Youtube video 
- *  3) Detect all the Songs in the description */
+/** After clicking on the extension icon, it will get the Spotify Track depending on the mode selected */
 async function onClick(){
     let tab = await chrome.tabs.query({active: true});
     tab = tab[0];
     
-    access_token = await chrome.storage.local.get(["access_token"], (result) => {
-        access_token = result.access_token;
-    } )
-    
-    if (tab.url && tab.url.includes("youtube.com/watch")){
+    await chrome.storage.local.get(["titleMode"], async (result) => {
+        titleMode = result.titleMode;
+
         document.getElementById("title").hidden = false;
+        document.getElementById("slider").hidden = false;
         document.getElementById("text").hidden = false;
-        getTitle(tab);
-        showPlaylists(tab);
-        detectSongs(tab);
+
+        if(titleMode){
+            document.getElementById('title').checked = true;
+            useTitle();
+        }
+        else    
+            detectSongs(tab);
+    });
+}
+
+
+/** Uses the video title to search for song instead */
+async function useTitle(){
+    const swiper = document.getElementById("swiper-wrapper");
+    if(!videoTitle == ""){
+        const track = await getTrack(videoTitle, "");
+        swiper.replaceChildren();
+        if(track !== undefined){
+            getTrackInfo(track);
+        }
+        else{
+            const text = document.createElement('h1');
+            text.innerHTML= "No songs were found on this video";
+            swiper.appendChild(text);
+        }
     }
 }
 
@@ -117,14 +160,25 @@ async function detectSongs(tab) {
         func: getSongs,
     }).then(async (songResults) => {
         const songs = songResults[0].result;
+        const swiper = document.getElementById("swiper-wrapper");
+        swiper.replaceChildren();
+
+        let songsAdded = 0;    
         for (let song of songs) {
             let track = await getTrack(song[0], song[1]);
+            const songHeader = song[0] + song[1];
             if (track === undefined){ 
-                track = await getTrack(song[0] + " " + song[1], ""); //Try searching without artist filter, might not detect it
-                if (track === undefined) return;
+                track = await getTrack(songHeader, ""); //Try searching without artist filter, might not detect it
+                if (track === undefined) continue;
             }
-
             getTrackInfo(track);
+            songsAdded++;
+        }
+
+        if (songsAdded === 0){
+            const text = document.createElement('h1');
+            text.innerHTML= "No songs were found on this video, try using Title Mode";
+            swiper.appendChild(text);
         }
       })
 }
