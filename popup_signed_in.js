@@ -41,7 +41,7 @@ async function initialize(){
     if (tab.url && tab.url.includes("youtube.com/watch")){
         await getTitle(tab).then(async () =>{
             showPlaylists(tab);
-            onClick(tab);
+            detectMode();
         });
     }
 }  
@@ -73,8 +73,8 @@ document.getElementById('title').addEventListener('click', async () =>  {
 });
 
 
-/** After clicking on the extension icon, it will get the Spotify Track depending on the mode selected */
-async function onClick(){
+/** Gets the Spotify Tracks depending on the mode selected */
+async function detectMode(){
     let tab = await chrome.tabs.query({active: true});
     tab = tab[0];
     
