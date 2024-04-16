@@ -101,6 +101,9 @@ async function useTitle(){
     if(!videoTitle == ""){
         const track = await getTrack(videoTitle, "");
         swiper.replaceChildren();
+        if (document.getElementById("amount") !== null) 
+            document.getElementById("amount").remove();
+        
         if(track !== undefined){
             getTrackInfo(track);
         }
@@ -162,6 +165,8 @@ async function detectSongs(tab) {
         const songs = songResults[0].result;
         const swiper = document.getElementById("swiper-wrapper");
         swiper.replaceChildren();
+        if (document.getElementById("amount") !== null) 
+            document.getElementById("amount").remove();
 
         let songsAdded = 0;    
         for (let song of songs) {
@@ -175,10 +180,16 @@ async function detectSongs(tab) {
             songsAdded++;
         }
 
+        const text = document.createElement('h1');
+        text.id = "amount";
+        const added = document.getElementById("songs");
         if (songsAdded === 0){
-            const text = document.createElement('h1');
             text.innerHTML= "No songs were found on this video, try using Title Mode";
-            swiper.appendChild(text);
+            added.insertBefore(text, document.getElementById("swiper"));
+        }
+        else if (songsAdded > 1){
+            text.innerHTML= songsAdded + " songs found";
+            added.insertBefore(text, document.getElementById("swiper"));
         }
       })
 }

@@ -6,11 +6,26 @@ body {
     color: white;
     font-family: "Ubuntu", sans-serif;
 }
+
+h1 {
+    margin:0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+p.label{
+    display: inline-block;
+}
+
+.title-mode{
+    padding-left: 165px;
+}
+
 div.button {
     position: relative;
-    left: 200px;
     transform: translateX(-50%);
-    width: 150px;
+    left:60px;
+    width: 100px;
     height: 20px;
     padding: 4px;
     font-size: 1.5em;
@@ -19,13 +34,19 @@ div.button {
     text-align: center;
     color: white;
     font-weight: bold;
-    margin-bottom: 15px;
     cursor: pointer;
     transition-duration: 0.3s;
+    display: inline-block;
 }
+
+div.sign-in {
+    left:50px;
+}
+
 div.button:hover {
-    transform: translateX(-50%) scale(1.3);
+    transform: translateX(-50%) scale(1.2);
 }
+
 img:not(.logo) {
     width: 75%;
     height: auto;
@@ -33,10 +54,12 @@ img:not(.logo) {
     border-radius:25px;
     transition-duration: 0.3s;
 }
+
 img.logo {
     width:250px;
     height: auto;
 }
+
 img:not(.logo):hover {
     transform: scale(1.025);
 }
@@ -58,7 +81,7 @@ select {
 
 .swiper {
     max-width: 400px;
-    padding: 25px;
+    padding: 15px;
 }
 
 .switch {
@@ -66,6 +89,7 @@ select {
     display: inline-block;
     width: 50px;
     height: 25px;
+    bottom: 7px;
   }
   
 .switch input { 
