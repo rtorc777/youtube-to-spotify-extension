@@ -81,9 +81,9 @@ async function detectMode(){
     await chrome.storage.local.get(["titleMode"], async (result) => {
         titleMode = result.titleMode;
 
-        document.getElementById("title").hidden = false;
-        document.getElementById("slider").hidden = false;
+        document.getElementById("title-mode").hidden = false;
         document.getElementById("text").hidden = false;
+        document.getElementById("songs").hidden = false;
 
         if(titleMode){
             document.getElementById('title').checked = true;
