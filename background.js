@@ -1,7 +1,7 @@
 //Request User Authorization - NOTE, using Implicit Grant Flow, so token doesn't refresh (Need to sign in and out every hour) 
-const CLIENT_ID = 'a2d10eb9ff814f72848448ee949e08af';
+const CLIENT_ID = ''; //Update with your own app
 const RESPONSE_TYPE = 'token';
-const REDIRECT_URI = 'http://cpefngoddfgkmljkmlfocjhlhpiajkcp.chromiumapp.org/';
+const REDIRECT_URI = 'http://<EXTENSION ID>.chromiumapp.org/'; //Update with your own app
 const SCOPE = 'user-read-email user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
 const SHOW_DIALOG = 'true';
 let STATE = '';
