@@ -1,6 +1,7 @@
 # Youtube Music to Spotify Chrome Extension
 
 A convenient Chrome extension to help you easily detect and transfer songs from Youtube Music in videos to your Spotify playlists
+
 ![login](https://github.com/rtorc777/youtube-to-spotify-extension/assets/133179555/04aaf891-c33a-4b5a-9863-16cfa16a0210) 
 ![app](https://github.com/rtorc777/youtube-to-spotify-extension/assets/133179555/c36f708d-c8d8-4329-98f0-7ba45ae7b022)
 
