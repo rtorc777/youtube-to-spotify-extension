@@ -308,14 +308,18 @@ async function getId(){
 
 /** Check for Youtube Music songs on page */
 function getSongs() {
-    videoTitle = document.querySelector("h1.ytd-watch-metadata").innerText; 
     const songs = [];
     const dupes = [];
     const titleResults = document.querySelectorAll("div.yt-video-attribute-view-model__metadata h1");
     const artistResults = document.querySelectorAll("div.yt-video-attribute-view-model__metadata h4");
     for(let i = 0; i < titleResults.length; i++){
         const title = titleResults[i].textContent;
-        const artist = artistResults[i].textContent;
+        let artist;
+        
+        if (artistResults[i] === undefined)
+            artist = "";
+        else
+            artist = artistResults[i].textContent;
         
         if(!dupes.includes(title)){
             dupes.push(title);
